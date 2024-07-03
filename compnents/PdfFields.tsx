@@ -75,40 +75,59 @@ const PdfFields = () => {
         console.error("Error uploading file to backend:", error);
         setFileUploadStatus("Fehler beim Hochladen der Datei");
       }
-    };    
-
-  return (
-    <div>
-      <h1>PDF to Form</h1>
-      <input type="file" accept=".pdf" onChange={handleFileChange} />
-      <button type="button" onClick={handleFileUpload}>PDF hochladen</button>
-      <form onSubmit={handleSubmit}>
-      <p>{fileUploadStatus}</p>
-        {fieldData.map((field, index) => (
-          <div key={index}>
-            <label>{field.name}</label>
-            {field.type === "textfield" ? (
-              <input
-                type="text"
-                name={field.name}
-                value={formValues[field.name] || ""}
-                onChange={handleChange}
-              />
-            ) : (
-              <input
-                type="checkbox"
-                name={field.name}
-                checked={!!formValues[field.name]}
-                onChange={handleChange}
-              />
-            )}
-          </div>
-        ))}
-        <button type="submit">Änderungen absenden</button>
-      </form>
-    </div>
-  );
-};
-
-export default PdfFields;
+    };   
+     
+    const handleDownload = async () => {
+      try {
+        const response = await fetch("/api/download", {
+          method: "GET",
+        });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'new_document.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+      } catch (error) {
+        console.error("Error downloading file:", error);
+      }
+    };
+  
+    return (
+      <div>
+        <h1>PDF to Form</h1>
+        <input type="file" accept=".pdf" onChange={handleFileChange} />
+        <button type="button" onClick={handleFileUpload}>PDF hochladen</button>
+        <form onSubmit={handleSubmit}>
+        <p>{fileUploadStatus}</p>
+          {fieldData.map((field, index) => (
+            <div key={index}>
+              <label>{field.name}</label>
+              {field.type === "textfield" ? (
+                <input
+                  type="text"
+                  name={field.name}
+                  value={formValues[field.name] || ""}
+                  onChange={handleChange}
+                />
+              ) : (
+                <input
+                  type="checkbox"
+                  name={field.name}
+                  checked={!!formValues[field.name]}
+                  onChange={handleChange}
+                />
+              )}
+            </div>
+          ))}
+          <button type="submit">Änderungen absenden</button>
+          <button type="button" onClick={handleDownload}>PDF herunterladen</button>
+        </form>
+      </div>
+    );
+  };
+  
+  export default PdfFields;
 
