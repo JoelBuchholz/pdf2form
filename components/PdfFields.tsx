@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import "tailwindcss/tailwind.css";
 import Head from "next/head";
 
 const PdfFields = () => {
@@ -136,7 +135,6 @@ const PdfFields = () => {
               PDF hochladen
             </button>
           </div>
-
           <form onSubmit={handleSubmit}>
             {fieldData.map((field, index) => (
               <div key={index}>

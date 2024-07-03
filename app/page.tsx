@@ -1,4 +1,4 @@
-import PdfFields from "@/compnents/PdfFields";
+import PdfFields from "@/components/PdfFields";
 import Image from "next/image";
 
 export default function Home() {
