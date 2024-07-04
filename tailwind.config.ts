@@ -12,20 +12,20 @@ const config: Config = {
         lato: ["Lato", "Helvetica Neue", "Arial", "Helvetica", "sans-serif"],
       },
       colors: {
-        "green-light": "rgb(224, 225, 226)",
+        "gray-light": "rgb(224, 225, 226)",
         "black-87": "rgba(0, 0, 0, .87)",
-        "gray-dark": "#BEBEBE",
-        "red-dark": "#5B5570"
+        "black-70": "rgba(0, 0, 0, .70)",
+        "gray-dark": "#D3D3D3",
+        "grayish": "#5B5570",
+        "very-light-gray": "#F5F5F5",
       },
       fontSize: {
         "24px": "24px",
         "20px": "20px",
-      },
-      fontWeight: {
-        "bold-550": "550",
+        "17px": "17px",
       },
       borderWidth: {
-        "4": "4px",
+        "3": "3px",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

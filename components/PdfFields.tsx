@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Head from "next/head";
+import { categories } from "./categories";
 
 const PdfFields = () => {
   const [fieldData, setFieldData] = useState<{ name: string; type: string }[]>(
@@ -102,6 +103,28 @@ const PdfFields = () => {
     }
   };
 
+  const [selectedCategory, setSelectedCategory] = useState(
+    Object.keys(categories)[0]
+  );
+
+  const handleZuruckClick = () => {
+    const categoryKeys = Object.keys(categories);
+    const currentIndex = categoryKeys.indexOf(selectedCategory);
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setSelectedCategory(categoryKeys[prevIndex]);
+    }
+  };
+
+  const handleWeiterClick = () => {
+    const categoryKeys = Object.keys(categories);
+    const currentIndex = categoryKeys.indexOf(selectedCategory);
+    if (currentIndex < categoryKeys.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setSelectedCategory(categoryKeys[nextIndex]);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -111,62 +134,134 @@ const PdfFields = () => {
         />
       </Head>
       <div className="h-screen w-screen">
-        <h1 className="font-lato text-black-87 text-24px font-bold-550 text-left mt-10 ml-4">
+        <h1 className="font-lato text-black-87 text-24px font-bold text-left mt-10 ml-1">
           PDF to Form
         </h1>
         <hr />
         <br />
-        <p className="font-lato font-bold text-left mt-10 ml-4 text-center text-red-dark">
+        <p className="font-lato font-bold text-left mt-10 ml-4 text-center text-grayish">
           {fileUploadStatus}
         </p>
         <div className="flex flex-col justify-center">
-          <div className="flex justify-center">
+          <div className="flex justify-center bg-very-light-gray p-4 max-w-xl mx-auto w-full border-2 rounded">
             <input
               type="file"
               accept=".pdf"
-              className="font-lato bg-green-light border-4 border-black-60 text-20px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
+              className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
               onChange={handleFileChange}
             />
             <button
               type="button"
-              className="font-lato bg-green-light border-4 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
+              className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
               onClick={handleFileUpload}
             >
               PDF hochladen
             </button>
           </div>
+          {fieldData.length > 0 && (
+            <div className="flex justify-center p-4 max-w-xl mx-auto w-full border-2 border-t-0 rounded">
+              <nav className="flex justify-around w-full">
+                {Object.keys(categories).map((category) => (
+                  <button
+                    key={category}
+                    className={`p-2 rounded-md border border-transpartent ${
+                      category === selectedCategory
+                        ? "bg-black-70 text-white"
+                        : "bg-transparent text-gray-dark hover:border-gray-dark hover:text-grayish"
+                    }`}
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          )}
+          <br />
           <form onSubmit={handleSubmit}>
-            {fieldData.map((field, index) => (
-              <div key={index}>
-                <label>{field.name}</label>
-                {field.type === "textfield" ? (
-                  <input
-                    type="text"
-                    name={field.name}
-                    value={formValues[field.name] || ""}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  <input
-                    type="checkbox"
-                    name={field.name}
-                    checked={!!formValues[field.name]}
-                    onChange={handleChange}
-                  />
-                )}
+            {fieldData.length > 0 && (
+              <div className="flex justify-center bg-very-light-gray p-4 max-w-7xl w-full border-2 border-t-0 rounded mx-auto">
+                {Object.keys(categories).map((category) => (
+                  <div
+                    key={category}
+                    className={`p-4 m-2 bg-white rounded shadow ${
+                      category === selectedCategory ? "block" : "hidden"
+                    }`}
+                  >
+                    <div className="flex flex-wrap">
+                      {categories[category].map((fieldName) => {
+                        const field = fieldData.find(
+                          (field) => field.name === fieldName
+                        );
+                        if (field) {
+                          return (
+                            <div key={fieldName} className="w-1/5 p-2">
+                              <label className="mr-2">{field.name}</label>
+                              {field.type === "textfield" ? (
+                                <input
+                                  type="text"
+                                  name={field.name}
+                                  value={formValues[field.name] || ""}
+                                  onChange={handleChange}
+                                  className="border-2 border-gray-300 rounded p-1 w-full"
+                                />
+                              ) : (
+                                <input
+                                  type="checkbox"
+                                  name={field.name}
+                                  checked={!!formValues[field.name]}
+                                  onChange={handleChange}
+                                  className="h-5 w-5 text-blue-600"
+                                />
+                              )}
+                            </div>
+                          );
+                        }
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-            <br />
-            <div className="flex justify-center">
+            )}
+
+            {fieldData.length > 0 && (
+              <div className="flex justify-end p-4 max-w-xl mx-auto w-full">
+                <div className="flex justify-center bg-very-light-gray border-2 rounded p-2 w-60">
+                  {fieldData.length > 0 &&
+                    selectedCategory !== Object.keys(categories)[0] && (
+                      <button
+                        className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
+                        onClick={handleZuruckClick}
+                      >
+                        Zurück
+                      </button>
+                    )}
+                  {fieldData.length > 0 &&
+                    selectedCategory !==
+                      Object.keys(categories)[
+                        Object.keys(categories).length - 1
+                      ] && (
+                      <button
+                        className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
+                        onClick={handleWeiterClick}
+                      >
+                        Weiter
+                      </button>
+                    )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-center bg-very-light-gray p-4 max-w-xl mx-auto w-full border-2 rounded">
               <button
                 type="submit"
-                className="font-lato bg-green-light border-4 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark mr-2"
+                className="font-lato bg-gray-light border-3 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark mr-2"
               >
                 Änderungen absenden
               </button>
               <button
                 type="button"
-                className="font-lato bg-green-light border-4 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
+                className="font-lato bg-gray-light border-3 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
                 onClick={handleDownload}
               >
                 PDF herunterladen
