@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import { categories } from "./categories";
 
@@ -12,6 +12,10 @@ const PdfFields = () => {
   const [fileUploadStatus, setFileUploadStatus] = useState(
     "Bitte fügen Sie eine PDF ein"
   );
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -103,6 +107,14 @@ const PdfFields = () => {
     }
   };
 
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
+  };
+
   const [selectedCategory, setSelectedCategory] = useState(
     Object.keys(categories)[0]
   );
@@ -152,7 +164,7 @@ const PdfFields = () => {
       "Telekommunikationsanlage: Durchwahl-Rufnummer",
     "Telekommonikations Anlagen Abfragestelle": "Abfragestelle",
     "Telekommonikations Anlagen Ruffnummernblock von": "Rufnummernblock von",
-    "Telekommonikations Anlagen Ruffnummernblock bis": "Rufnummernblock bis",
+    "Telekommonikations Anlagen Ruffnummernblock bis": "bis",
     "Ort Datum": "Ort, Datum",
     "Vertragspartner und ggf Firmenstempel":
       "Unterschrift: (Vertragspartner und ggf. Firmenstempel)",
@@ -165,363 +177,551 @@ const PdfFields = () => {
     "über FaxEMail": "Über Fax/E-Mail",
     Tel: "Tel.",
     "Ressourcenübernahme ja": "Ressourcenübernahme: ja",
-    "Ressourcenübernahme nein": "nein",
+    "Ressourcenübernahme nein": "Ressourcenübernahme: nein",
     "Storno ausgeführt ja": "Storno ausgeführt: ja",
-    "Storno ausgeführt nein": "nein",
+    "Storno ausgeführt nein": "Storno ausgeführt: nein",
   };
 
   return (
     <>
       <Head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-          rel="stylesheet"
-        />
+        <meta charSet="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"></meta>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+        ></meta>
+        <title>PDF2FORM</title>
       </Head>
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="http://ui.sipsale.de/style.css"
+      ></link>
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="http://ui.sipsale.de/semantic/dist/semantic.min.css"
+      ></link>
+      <link
+        rel="stylesheet"
+        type="text/css"
+        href="http://ui.sipsale.de/semantic/dist/calendar.min.css"
+      ></link>
+      <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossOrigin="anonymous"
+      ></script>
+      <script src="http://ui.sipsale.de/semantic/dist/semantic.min.js"></script>
+      <script src="http://ui.sipsale.de/semantic/dist/calendar.min.js"></script>
       {/*MAIN DIV*/}
-      <div className="h-screen w-screen">
-        <h1 className="font-lato text-black-87 text-24px font-bold text-left mt-10 ml-1">
-          PDF to Form
-        </h1>
-        <hr />
-        <br />
-        <p className="font-lato font-bold text-left mt-10 ml-4 text-center text-grayish">
-          {fileUploadStatus}
-        </p>
-        {/*FILE UPLOAD BUTTONS*/}
-        <div className="flex flex-col justify-center">
-          <div className="flex justify-center bg-very-light-gray p-4 max-w-xl mx-auto w-full border-2 rounded">
-            <input
-              type="file"
-              accept=".pdf"
-              className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
-              onChange={handleFileChange}
-            />
-            <button
-              type="button"
-              className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
-              onClick={handleFileUpload}
+      <br />
+      <h2 className="ui dividing header w-full">PDF2FORM</h2>
+      <br />
+      {/*NAVBAR*/}
+      <div className="ui last container">
+        <div className="ui three ordered steps">
+          {Object.keys(categories).map((category) => (
+            <div
+              key={category}
+              className={`content ${
+                category === selectedCategory ? "active step" : "disabled step"
+              }`}
             >
-              PDF hochladen
-            </button>
-          </div>
-          {/*NAVBAR*/}
-          {fieldData.length > 0 && (
-            <div className="flex justify-center p-4 max-w-xl mx-auto w-full border-2 border-t-0 rounded">
-              <nav className="flex justify-around w-full">
-                {Object.keys(categories).map((category) => (
-                  <button
-                    key={category}
-                    className={`p-2 rounded-md border border-transpartent ${
-                      category === selectedCategory
-                        ? "bg-black-70 text-white"
-                        : "bg-transparent text-gray-dark hover:border-gray-dark hover:text-grayish"
-                    }`}
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </nav>
+              <div className="title">{category}</div>
             </div>
-          )}
-          <br />
-          {/*START PDF DISPLAY*/}
-          <form onSubmit={handleSubmit}>
-            {/*MAIN DIV CONTAINER*/}
-            {fieldData.length > 0 && (
-              <div className="flex justify-center bg-very-light-gray p-4 max-w-7xl w-full border-2 border-t-0 rounded mx-auto">
-                {Object.keys(categories).map((category) => (
-                  // DIV CONTAINER DIV FOR EACH CATEGORY
-                  <div
-                    key={category}
-                    className={`p-4 m-2 bg-white rounded shadow ${
-                      category === selectedCategory ? "block" : "hidden"
-                    }`}
-                  >
-                    {/*DIV CONTAINER FOR THE FORM FIELDS*/}
-                    <div className="flex flex-col">
-                      {categories[category].map((fieldName) => {
-                        const field = fieldData.find(
-                          (field) => field.name === fieldName
-                        );
-                        if (field) {
-                          return (
-                            // DIV CONTAINER FOR EACH FORM FIELD
-                            <div
-                              key={fieldName}
-                              className="flex w-1/5 p-2 w-full"
-                            >
-                              {fieldName === "Rufnummern Mitnahme" && (
-                                // DIV CONTAINER FOR THE "RUFNUMMERN MITNAHME" FIELD AND ITS SUBFIELDS
-                                <div className="flex gap-4">
-                                  <div>
-                                    {/* DIV FOR LABELS AND CHECKBOXES*/}
+          ))}
+        </div>
+      </div>
+      <br />
+      <br />
+      {/*START PDF DISPLAY*/}
+      <div id="step1" className="ui form last message container">
+        <form onSubmit={handleSubmit}>
+          {/*MAIN DIV CONTAINER*/}
+          {Object.keys(categories).map((category) => (
+            // DIV CONTAINER DIV FOR EACH CATEGORY
+            <div
+              key={category}
+              className={` ${
+                category === selectedCategory ? "block" : "hidden"
+              }`}
+            >
+              {/*DIV CONTAINER FOR THE FORM FIELDS*/}
+              <div className="field">
+                {categories[category].map((fieldName) => {
+                  const field = fieldData.find(
+                    (field) => field.name === fieldName
+                  );
+                  if (field) {
+                    return (
+                      // DIV CONTAINER FOR EACH FORM FIELD
+                      <div key={fieldName} className="field">
+                        {fieldName === "Alten Vertrag Kuendigen" && (
+                          // DIV CONTAINER FOR THE "Alten Vertrag Kuendigen" FIELD AND ITS SUBFIELD
+                          <div className="flex gap-4">
+                            <div>
+                              {/* DIV FOR LABELS AND CHECKBOXES*/}
+                              <label className="mr-2">
+                                {displayNameMapping[field.name] || field.name}
+                              </label>
+                              <input
+                                type="checkbox"
+                                name={field.name}
+                                checked={!!formValues[field.name]}
+                                onChange={handleChange}
+                                className="h-5 w-5 text-black-70"
+                              />
+                            </div>
+                            {["Kndigen von"].map((name) => {
+                              const innerField = fieldData.find(
+                                (field) => field.name === name
+                              );
+                              if (innerField) {
+                                return (
+                                  // DIV CONTAINER FOR EACH TEXT FIELD FROM "Alter Vertrag Kuendigen"
+                                  <div
+                                    key={name}
+                                    className="flex items-center gap-5"
+                                  >
                                     <label className="mr-2">
-                                      {displayNameMapping[field.name] ||
-                                        field.name}
+                                      {displayNameMapping[innerField.name] ||
+                                        innerField.name}
                                     </label>
                                     <input
-                                      type="checkbox"
-                                      name={field.name}
-                                      checked={!!formValues[field.name]}
+                                      type="text"
+                                      name={innerField.name}
+                                      value={formValues[innerField.name] || ""}
                                       onChange={handleChange}
-                                      className="h-5 w-5 text-black-70"
+                                      className="border-2 border-gray-300 rounded p-1 w-full mr-1 ml-20"
+                                      disabled={!formValues[field.name]}
                                     />
                                   </div>
-                                  {[
-                                    "NameFirma",
-                                    "Vorname",
-                                    "Straße",
-                                    "Hausnr",
-                                    "PLZ",
-                                    "Ort",
-                                  ].map((name) => {
-                                    const innerField = fieldData.find(
-                                      (field) => field.name === name
-                                    );
-                                    if (innerField) {
-                                      return (
-                                        // DIV CONTAINER FOR EACH TEXT FIELD FROM "RUFNUMMERN MITNAHME"
-                                        <div key={name}>
-                                          <label className="mr-2">
-                                            {displayNameMapping[
-                                              innerField.name
-                                            ] || innerField.name}
-                                          </label>
-                                          <input
-                                            type="text"
-                                            name={innerField.name}
-                                            value={
-                                              formValues[innerField.name] || ""
-                                            }
-                                            onChange={handleChange}
-                                            className="border-2 border-gray-300 rounded p-1 w-full mr-5"
-                                          />
-                                        </div>
-                                      );
-                                    }
-                                  })}
-                                </div>
-                              )}
-                              {/* DIV CONTAINER FOR THE "RUFNUMMERN" AND "TELEKOMMUNIKATIONSANLAGE" FIELDS AND ITS SUBFIELDS*/}
-                              <div className="flex ">
-                                {fieldName ===
-                                  "Rufnummern Mitnahme alle Nr der Anschluesse portieren" && (
-                                  // DIV CONTAINER FOR THE "RUFNUMMERN" FIELD AND ITS SUBFIELDS
-                                  <div className="flex flex-col items-left w-full gap-2">
-                                    <div>
-                                      {/* DIV FOR LABELS AND CHECKBOXES*/}
-                                      <label className="mr-2">
-                                        {displayNameMapping[field.name] ||
-                                          field.name}
-                                      </label>
-                                      <input
-                                        type="checkbox"
-                                        name={field.name}
-                                        checked={!!formValues[field.name]}
-                                        onChange={handleChange}
-                                        className="h-5 w-5 text-black-70"
-                                      />
-                                    </div>
-                                    {[
-                                      "Rufnummern Mitnahme Ortskennzahl",
-                                      "Rufnummern Mitnahme Ortskennzahl 2",
-                                      "Rufnummern Mitnahme Rufnummer 1",
-                                      "Rufnummern Mitnahme Rufnummer 2",
-                                      "Rufnummern Mitnahme Rufnummer 3",
-                                      "Rufnummern Mitnahme Rufnummer 4",
-                                      "Rufnummern Mitnahme Rufnummer 5",
-                                      "Rufnummern Mitnahme Rufnummer 6",
-                                      "Rufnummern Mitnahme Rufnummer 7",
-                                      "Rufnummern Mitnahme Rufnummer 8",
-                                      "Rufnummern Mitnahme Rufnummer 9",
-                                    ].map((name) => {
-                                      const innerField = fieldData.find(
-                                        (field) => field.name === name
-                                      );
-                                      if (innerField) {
-                                        return (
-                                          // DIV CONTAINER FOR EACH TEXT FIELD FROM "RUFNUMMERN"
-                                          <div key={name}>
-                                            <label className="w-full">
-                                              {displayNameMapping[
-                                                innerField.name
-                                              ] || innerField.name}
-                                            </label>
-                                            <input
-                                              type="text"
-                                              name={innerField.name}
-                                              value={
-                                                formValues[innerField.name] ||
-                                                ""
-                                              }
-                                              onChange={handleChange}
-                                              className="border-2 border-gray-300 rounded p-1 w-full mr-5"
-                                            />
-                                          </div>
-                                        );
-                                      }
-                                    })}
-                                  </div>
-                                )}
-                                {fieldName ===
-                                  "Telekommonikations Anlagen Duchwahl-RN" && (
-                                  // DIV CONTAINER FOR THE "Telekommunikation" FIELD AND ITS SUBFIELDS
-                                  <div className="flex flex-col items-left w-full gap-2">
-                                    <div>
-                                      {/* DIV FOR LABELS AND CHECKBOXES*/}
-                                      <label className="mr-2">
-                                        {displayNameMapping[field.name] ||
-                                          field.name}
-                                      </label>
-                                      <input
-                                        type="checkbox"
-                                        name={field.name}
-                                        checked={!!formValues[field.name]}
-                                        onChange={handleChange}
-                                        className="h-5 w-5 text-black-70"
-                                      />
-                                    </div>
-                                    {[
-                                      "Telekommonikations Anlagen Abfragestelle",
-                                      "Telekommonikations Anlagen Ruffnummernblock von",
-                                      "Telekommonikations Anlagen Ruffnummernblock bis",
-                                    ].map((name) => {
-                                      const innerField = fieldData.find(
-                                        (field) => field.name === name
-                                      );
-                                      if (innerField) {
-                                        return (
-                                          // DIV CONTAINER FOR EACH TEXT FIELD FROM "Telekommunikation"
-                                          <div key={name}>
-                                            <label className="w-full">
-                                              {displayNameMapping[
-                                                innerField.name
-                                              ] || innerField.name}
-                                            </label>
-                                            <input
-                                              type="text"
-                                              name={innerField.name}
-                                              value={
-                                                formValues[innerField.name] ||
-                                                ""
-                                              }
-                                              onChange={handleChange}
-                                              className="border-2 border-gray-300 rounded p-1 w-full mr-5"
-                                            />
-                                          </div>
-                                        );
-                                      }
-                                    })}
-                                  </div>
-                                )}
-                              </div>
-                              {fieldName === "Ressourcenübernahme ja" && (
-                                // DIV CONTAINER FOR THE "Ressourcenübernahme" FIELD AND ITS SUBFIELD
-                                <div className="flex">
-                                  <div>
-                                    <label className="flex">
-                                      {displayNameMapping[field.name] ||
-                                        field.name}
+                                );
+                              }
+                            })}
+                          </div>
+                        )}
+                        {fieldName === "Rufnummern Mitnahme" && (
+                          // DIV CONTAINER FOR THE "RUFNUMMERN MITNAHME" FIELD AND ITS SUBFIELDS
+                          <div className="flex gap-4">
+                            <div>
+                              {/* DIV FOR LABELS AND CHECKBOXES*/}
+                              <label className="mr-2">
+                                {displayNameMapping[field.name] || field.name}
+                              </label>
+                              <input
+                                type="checkbox"
+                                name={field.name}
+                                checked={!!formValues[field.name]}
+                                onChange={handleChange}
+                                className="h-5 w-5 text-black-70"
+                              />
+                            </div>
+                            {[
+                              "NameFirma",
+                              "Vorname",
+                              "Straße",
+                              "Hausnr",
+                              "PLZ",
+                              "Ort",
+                            ].map((name) => {
+                              const innerField = fieldData.find(
+                                (field) => field.name === name
+                              );
+                              if (innerField) {
+                                return (
+                                  // DIV CONTAINER FOR EACH TEXT FIELD FROM "RUFNUMMERN MITNAHME"
+                                  <div key={name}>
+                                    <label className="mr-2">
+                                      {displayNameMapping[innerField.name] ||
+                                        innerField.name}
                                     </label>
                                     <input
-                                      type="checkbox"
-                                      name={field.name}
-                                      checked={!!formValues[field.name]}
+                                      type="text"
+                                      name={innerField.name}
+                                      value={formValues[innerField.name] || ""}
                                       onChange={handleChange}
-                                      className="h-5 w-5 text-black-70"
+                                      className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                      disabled={!formValues[field.name]}
                                     />
                                   </div>
-                                </div>
-                              )}
+                                );
+                              }
+                            })}
+                          </div>
+                        )}
 
-                              {field.name !== "Rufnummern Mitnahme" &&
-                                field.name !==
-                                  "Rufnummern Mitnahme alle Nr der Anschluesse portieren" &&
-                                field.name !== "Ressourcenübernahme ja" &&
-                                field.name !==
-                                  "Telekommonikations Anlagen Duchwahl-RN" && (
-                                  // DIV CONTAINER FOR THE FORM FIELDS THAT ARE NOT THE ONES WRITTEN
-                                  <div className="grid grid-rows-auto grid-cols-4 w-full">
-                                    <label className="mr-2">
-                                      {displayNameMapping[field.name] ||
-                                        field.name}
-                                    </label>
-                                    {field.type === "textfield" ? (
+                        {fieldName ===
+                          "Rufnummern Mitnahme alle Nr der Anschluesse portieren" && (
+                          // DIV CONTAINER FOR THE "RUFNUMMERN" FIELD AND ITS SUBFIELDS
+                          <div className="flex flex-row gap-4 mx-auto">
+                            <div className="flex flex-col items-left gap-2 w-1/2">
+                              <div>
+                                {/* DIV FOR LABELS AND CHECKBOXES*/}
+                                <label className="mr-2">
+                                  {displayNameMapping[field.name] || field.name}
+                                </label>
+                                <input
+                                  type="checkbox"
+                                  name={field.name}
+                                  checked={!!formValues[field.name]}
+                                  onChange={handleChange}
+                                  className="h-5 w-5 text-black-70"
+                                />
+                              </div>
+                              {[
+                                "Rufnummern Mitnahme Ortskennzahl",
+                                "Rufnummern Mitnahme Ortskennzahl 2",
+                                "Rufnummern Mitnahme Rufnummer 1",
+                                "Rufnummern Mitnahme Rufnummer 2",
+                                "Rufnummern Mitnahme Rufnummer 3",
+                                "Rufnummern Mitnahme Rufnummer 4",
+                                "Rufnummern Mitnahme Rufnummer 5",
+                                "Rufnummern Mitnahme Rufnummer 6",
+                                "Rufnummern Mitnahme Rufnummer 7",
+                                "Rufnummern Mitnahme Rufnummer 8",
+                                "Rufnummern Mitnahme Rufnummer 9",
+                              ].map((name) => {
+                                const innerField = fieldData.find(
+                                  (field) => field.name === name
+                                );
+                                if (innerField) {
+                                  return (
+                                    // DIV CONTAINER FOR EACH TEXT FIELD FROM "RUFNUMMERN"
+                                    <div key={name}>
+                                      <label className="w-full">
+                                        {displayNameMapping[innerField.name] ||
+                                          innerField.name}
+                                      </label>
                                       <input
                                         type="text"
-                                        name={field.name}
-                                        value={formValues[field.name] || ""}
+                                        name={innerField.name}
+                                        value={
+                                          formValues[innerField.name] || ""
+                                        }
                                         onChange={handleChange}
-                                        className="border-2 border-gray-300 rounded p-1 w-full"
+                                        className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        disabled={!formValues[field.name]}
                                       />
-                                    ) : (
-                                      <input
-                                        type="checkbox"
-                                        name={field.name}
-                                        checked={!!formValues[field.name]}
-                                        onChange={handleChange}
-                                        className="h-5 w-5 text-black-70"
-                                      />
-                                    )}
-                                  </div>
-                                )}
+                                    </div>
+                                  );
+                                }
+                              })}
                             </div>
-                          );
-                        }
-                      })}
-                    </div>
-                  </div>
-                ))}
+                            <div className="flex flex-col items-left gap-2 w-1/2">
+                              {[
+                                "Telekommonikations Anlagen Duchwahl-RN",
+                                "Telekommonikations Anlagen Abfragestelle",
+                              ].map((name) => {
+                                const innerField = fieldData.find(
+                                  (field) => field.name === name
+                                );
+                                if (innerField) {
+                                  return (
+                                    // DIV CONTAINER FOR EACH TEXT FIELD FROM "Telekommunikation"
+                                    <div key={name}>
+                                      <label className="w-full">
+                                        {displayNameMapping[innerField.name] ||
+                                          innerField.name}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name={innerField.name}
+                                        value={
+                                          formValues[innerField.name] || ""
+                                        }
+                                        onChange={handleChange}
+                                        className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                      />
+                                    </div>
+                                  );
+                                }
+                              })}
+                              <div className="flex items-left gap-2 w-1/2">
+                                {[
+                                  "Telekommonikations Anlagen Ruffnummernblock von",
+                                  "Telekommonikations Anlagen Ruffnummernblock bis",
+                                ].map((name) => {
+                                  const innerField = fieldData.find(
+                                    (field) => field.name === name
+                                  );
+                                  if (innerField) {
+                                    return (
+                                      // DIV CONTAINER FOR EACH TEXT FIELD FROM "Telekommunikation"
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name={innerField.name}
+                                          value={
+                                            formValues[innerField.name] || ""
+                                          }
+                                          onChange={handleChange}
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                })}
+                              </div>
+                              <div className="flex flex-col items-left gap-2 w-1/2">
+                                {[
+                                  "Ort Datum",
+                                  "Vertragspartner und ggf Firmenstempel",
+                                ].map((name) => {
+                                  const innerField = fieldData.find(
+                                    (field) => field.name === name
+                                  );
+                                  if (innerField) {
+                                    return (
+                                      // DIV CONTAINER FOR EACH TEXT FIELD FROM "Telekommunikation"
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name={innerField.name}
+                                          value={
+                                            formValues[innerField.name] || ""
+                                          }
+                                          onChange={handleChange}
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {fieldName === "WBCIGF" && (
+                          <div className="flex flex-row gap-4 mx-auto">
+                            <div className="flex flex-col items-left gap-2 w-1/2">
+                              <div>
+                                <label className="mr-2">
+                                  {displayNameMapping[field.name] || field.name}
+                                </label>
+                                <input
+                                  type="text"
+                                  name={field.name}
+                                  checked={!!formValues[field.name]}
+                                  onChange={handleChange}
+                                  className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                />
+                              </div>
+                              {[
+                                "Vorab-ID",
+                                "Änderungs-Storno-ID",
+                                "PKlauf",
+                                "Wechseltermin",
+                              ].map((name) => {
+                                const innerField = fieldData.find(
+                                  (field) => field.name === name
+                                );
+                                if (innerField) {
+                                  return (
+                                    <div key={name}>
+                                      <label className="w-full">
+                                        {displayNameMapping[innerField.name] ||
+                                          innerField.name}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name={innerField.name}
+                                        value={
+                                          formValues[innerField.name] || ""
+                                        }
+                                        onChange={handleChange}
+                                        className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                      />
+                                    </div>
+                                  );
+                                }
+                              })}
+                            </div>
+                            <div className="flex flex-col items-left gap-2 w-1/2">
+                              {[
+                                "Neuer Wechseltermin",
+                                "Rückinformation an",
+                                "über FaxEMail",
+                                "Tel",
+                              ].map((name) => {
+                                const innerField = fieldData.find(
+                                  (field) => field.name === name
+                                );
+                                if (innerField) {
+                                  if (name === "Rückinformation an") {
+                                    return (
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <select
+                                          name={innerField.name}
+                                          value={
+                                            formValues[innerField.name] || ""
+                                          }
+                                          onChange={handleSelectChange}
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        >
+                                          <option value="Name1">Norwin Reitzenstein</option>
+                                          <option value="Name2">Andreas Hammerschmidt</option>
+                                          <option value="Name3">Daniel Witt</option>
+                                        </select>
+                                      </div>
+                                    );
+                                  } else if (name === "über FaxEMail") {
+                                    return (
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name={innerField.name}
+                                          value="technik@terrera.ag"
+                                          readOnly
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        />
+                                      </div>
+                                    );
+                                  } else if (name === "Tel") {
+                                    return (
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name={innerField.name}
+                                          value="0911 5401715"
+                                          readOnly
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        />
+                                      </div>
+                                    );
+                                  } else {
+                                    return (
+                                      <div key={name}>
+                                        <label className="w-full">
+                                          {displayNameMapping[
+                                            innerField.name
+                                          ] || innerField.name}
+                                        </label>
+                                        <input
+                                          type="text"
+                                          name={innerField.name}
+                                          value={
+                                            formValues[innerField.name] || ""
+                                          }
+                                          onChange={handleChange}
+                                          className="border-2 border-gray-300 rounded p-1 w-full mr-5"
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                }
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {field.name !== "Rufnummern Mitnahme" &&
+                          field.name !==
+                            "Rufnummern Mitnahme alle Nr der Anschluesse portieren" &&
+                          field.name !== "WBCIGF" &&
+                          field.name !==
+                            "Telekommonikations Anlagen Duchwahl-RN" &&
+                          field.name !== "Alten Vertrag Kuendigen" &&
+                          field.name !== "Ort Datum" && (
+                            // DIV CONTAINER FOR THE FORM FIELDS THAT ARE NOT THE ONES WRITTEN
+                            <div className="grid grid-rows-auto grid-cols-4 w-full">
+                              <label className="mr-2">
+                                {displayNameMapping[field.name] || field.name}
+                              </label>
+                              {field.type === "textfield" ? (
+                                <input
+                                  type="text"
+                                  name={field.name}
+                                  value={formValues[field.name] || ""}
+                                  onChange={handleChange}
+                                  className="border-2 border-gray-300 rounded p-1 w-full"
+                                />
+                              ) : (
+                                <input
+                                  type="checkbox"
+                                  name={field.name}
+                                  checked={!!formValues[field.name]}
+                                  onChange={handleChange}
+                                  className="h-5 w-5 text-black-70"
+                                />
+                              )}
+                            </div>
+                          )}
+                      </div>
+                    );
+                  }
+                })}
               </div>
-            )}
-            {/*ZURÜCK AND WEITER BUTTONS*/}
-            {fieldData.length > 0 && (
-              <div className="flex justify-end p-4 max-w-xl mx-auto w-full">
-                <div className="flex justify-center bg-very-light-gray border-2 rounded p-2 w-60">
-                  {fieldData.length > 0 &&
-                    selectedCategory !== Object.keys(categories)[0] && (
-                      <button
-                        className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
-                        onClick={handleZuruckClick}
-                      >
-                        Zurück
-                      </button>
-                    )}
-                  {fieldData.length > 0 &&
-                    selectedCategory !==
-                      Object.keys(categories)[
-                        Object.keys(categories).length - 1
-                      ] && (
-                      <button
-                        className="font-lato bg-gray-light border-3 border-black-60 text-17px rounded-md p-1 hover:bg-gray-dark hover:border-gray-dark mr-2"
-                        onClick={handleWeiterClick}
-                      >
-                        Weiter
-                      </button>
-                    )}
-                </div>
-              </div>
-            )}
-            {/*BUTTONS SAVE CHANGES AND PDF DOWNLOAD*/}
-            <div className="flex justify-center bg-very-light-gray p-4 max-w-xl mx-auto w-full border-2 rounded">
-              <button
-                type="submit"
-                className="font-lato bg-gray-light border-3 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark mr-2"
-              >
-                Änderungen absenden
-              </button>
-              <button
-                type="button"
-                className="font-lato bg-gray-light border-3 border-black-60 text-20px rounded-md p-2 hover:bg-gray-dark hover:border-gray-dark"
-                onClick={handleDownload}
-              >
-                PDF herunterladen
-              </button>
             </div>
-          </form>
-        </div>
+          ))}
+          {/*ZURÜCK AND WEITER BUTTONS*/}
+          <div className="flex justify-end p-4 max-w-xl mx-auto w-full">
+            {fieldData.length > 0 &&
+              selectedCategory !== Object.keys(categories)[0] && (
+                <button
+                  className="ui right labeled icon button fluid submit"
+                  onClick={handleZuruckClick}
+                >
+                  Zurück
+                </button>
+              )}
+            {fieldData.length > 0 &&
+              selectedCategory !==
+                Object.keys(categories)[Object.keys(categories).length - 1] && (
+                <button
+                  className="ui right labeled icon button fluid submit"
+                  onClick={handleWeiterClick}
+                >
+                  Weiter
+                </button>
+              )}
+          </div>
+          {/*BUTTONS SAVE CHANGES AND PDF DOWNLOAD*/}
+          <div className="flex justify-end p-4 mx-auto w-full">
+            <button
+              type="submit"
+              className="ui right labeled icon button fluid submit"
+            >
+              Änderungen absenden
+            </button>
+            <button
+              type="submit"
+              className="ui right labeled icon button fluid submit"
+              onClick={handleDownload}
+            >
+              <i className="right arrow icon"></i>
+              PDF herunterladen
+            </button>
+          </div>
+        </form>
       </div>
     </>
   );

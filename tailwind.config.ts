@@ -16,8 +16,8 @@ const config: Config = {
         "black-87": "rgba(0, 0, 0, .87)",
         "black-70": "rgba(0, 0, 0, .70)",
         "gray-dark": "#D3D3D3",
-        "grayish": "#5B5570",
-        "very-light-gray": "#F5F5F5",
+        "grayish": "#F8F8F9",
+        "blueish": "#4183c4",
       },
       fontSize: {
         "24px": "24px",
